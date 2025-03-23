@@ -48,11 +48,10 @@ streamlit run app.py
 - `numpy`
 - `scipy`
 
-## 📸 Screenshots
+## 📸 Link to App
 (Include screenshots of the app in action)
 
-## 📜 License
-This project is licensed under the MIT License.
+
 
 ## 🤝 Contributing
 Feel free to fork this repository and submit pull requests. Contributions are welcome!

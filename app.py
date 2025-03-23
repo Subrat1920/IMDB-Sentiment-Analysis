@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
 from tensorflow.keras.datasets import imdb
+from pathlib import Path
 import random
 
 # Load IMDB word index
@@ -11,7 +12,19 @@ word_index = imdb.get_word_index()
 reverse_word_index = {value: key for key, value in word_index.items()}
 
 # Load model
-model = load_model("Notebook\keras_models\sentiment_model.keras")
+try:
+    # Use forward slashes for cross-platform compatibility
+    model_path = Path("Notebook/keras_models/sentiment_model.keras")
+    
+    # Verify model file exists
+    if not model_path.exists():
+        st.error(f"Model file not found at: {model_path.absolute()}")
+        st.stop()
+        
+    model = load_model(model_path)
+except Exception as e:
+    st.error(f"Error loading model: {str(e)}")
+    st.stop()
 
 # Movie stills URLs (replace with your own images)
 MOVIE_STILLS = [
