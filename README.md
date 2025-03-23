@@ -49,7 +49,7 @@ streamlit run app.py
 - `scipy`
 
 ## 📸 Link to App
-(Include screenshots of the app in action)
+https://imdb-sentiment-analyse.streamlit.app/
 
 
 
