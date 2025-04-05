@@ -7,16 +7,15 @@ from tensorflow.keras.datasets import imdb
 from pathlib import Path
 import random
 
-# Load IMDB word index
+
 word_index = imdb.get_word_index()
 reverse_word_index = {value: key for key, value in word_index.items()}
 
-# Load model
+
 try:
-    # Use forward slashes for cross-platform compatibility
     model_path = Path("Notebook/keras_models/sentiment_model.keras")
     
-    # Verify model file exists
+    
     if not model_path.exists():
         st.error(f"Model file not found at: {model_path.absolute()}")
         st.stop()
@@ -26,29 +25,29 @@ except Exception as e:
     st.error(f"Error loading model: {str(e)}")
     st.stop()
 
-# Movie stills URLs (replace with your own images)
+
 MOVIE_STILLS = [
-    "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",  # Cinema
-    "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",  # Movie theater
-    "https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=2",  # Film reel
-    "https://images.pexels.com/photos/7991158/pexels-photo-7991158.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=2",  # Popcorn
-    "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",  # Director's chair
+    "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",  
+    "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",  
+    "https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=2", 
+    "https://images.pexels.com/photos/7991158/pexels-photo-7991158.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=2", 
+    "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",  
 ]
-# Function to preprocess text
+
 def preprocess_text(text):
     words = text.lower().split()
     encoded_review = [word_index.get(word, 2) + 3 for word in words]
     padded_review = pad_sequences([encoded_review], maxlen=500, padding='pre')
     return padded_review
 
-# Function to predict sentiment
+
 def predict_sentiment(review):
     preprocessed_input = preprocess_text(review)
     prediction = model.predict(preprocessed_input)[0][0]
     confidence = abs(prediction - 0.5) * 200
     return prediction, confidence
 
-# Streamlit UI Configuration
+
 st.set_page_config(
     page_title="CineMood AI",
     layout="wide",
@@ -56,7 +55,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS with cinematic theme
+
 st.markdown(f"""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Cinzel:wght@700&display=swap');
@@ -161,7 +160,7 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# Hero Section
+
 st.markdown(f"""
     <div class="header">
         <h1 style="font-family: 'Cinzel', serif; font-size: 3.5rem; color: #ffd700;">
@@ -173,7 +172,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# Movie Stills Carousel
+
 st.markdown("""
     <div class="movie-stills">
         <img class="movie-still" src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80">
@@ -184,7 +183,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Main Content
+
 col1, col2 = st.columns([1, 1])
 
 with col1:
@@ -201,6 +200,7 @@ with col1:
         </div>
     """, unsafe_allow_html=True)
 
+
 with col2:
     review = st.text_area(
         "✨ WRITE YOUR MOVIE REVIEW:",
@@ -211,39 +211,87 @@ with col2:
 
     if st.button("🎥 ANALYZE CINEMATIC IMPACT", use_container_width=True):
         if not review.strip():
-            st.error("Please enter a review to analyze!")
+            st.error("🎬 The director needs your review! Please write something about the movie.")
         else:
             with st.spinner("Reel is spinning... capturing cinematic essence..."):
-                prediction, confidence = predict_sentiment(review)
-                sentiment_color = "#00ff00" if prediction >= 0.5 else "#ff0000"
-                sentiment_emoji = "🎬" if prediction >= 0.5 else "💥"
-                sentiment_label = "CINEMATIC MASTERPIECE" if prediction >= 0.5 else "BOX OFFICE BOMB"
+                try:
+                    prediction, confidence = predict_sentiment(review)
+                    
+                    
+                    words = review.lower().split()
+                    unknown_words = [word for word in words if word not in word_index]
+                    unknown_ratio = len(unknown_words)/len(words) if words else 0
+                    
+                    if unknown_ratio > 0.7:
+                        st.warning(f"""
+                        🎥 **Script Error!**  
+                        Our AI director didn't recognize many of your words.  
+                        Try a more standard film review like:  
+                        *"The cinematography was breathtaking, with stellar performances that left me captivated."*
+                        """)
+                    else:
+                        sentiment_color = "#00ff00" if prediction >= 0.5 else "#ff0000"
+                        sentiment_emoji = "🎬" if prediction >= 0.5 else "💣"
+                        sentiment_label = "CINEMATIC MASTERPIECE" if prediction >= 0.5 else "CINEMATIC DISASTER"
+                        reviewer_verdict = "The critics are raving!" if prediction >= 0.5 else "Rotten tomatoes everywhere!"
+                        
+                        if prediction >= 0.5:
+                            star_count = min(5, max(1, int((confidence / 100) * 5)))
+                            film_rating = "⭐" * star_count
+                            if confidence < 70:
+                                film_rating += "½"  
+                        else:
+                            skull_count = min(5, max(1, int(((100 - confidence) / 100) * 5)))
+                            film_rating = "💀" * skull_count
+                            if confidence < 70:
+                                film_rating += "½"  
 
-                st.markdown(f"""
-                    <div class="result-card" style="border-color: {sentiment_color}">
-                        <div style="text-align: center;">
-                            <div style="font-size: 4rem; margin-bottom: 1rem;">
-                                {sentiment_emoji}
+                        st.markdown(f"""
+                            <div class="result-card" style="border-color: {sentiment_color}">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 4rem; margin-bottom: 1rem;">
+                                        {sentiment_emoji}
+                                    </div>
+                                    <h2 style="color: {sentiment_color}; margin: 1rem 0;">
+                                        {sentiment_label}
+                                    </h2>
+                                    <p style="font-style: italic; color: {sentiment_color}">
+                                        "{reviewer_verdict}"
+                                    </p>
+                                    <div style="font-size: 2rem; margin: 1rem 0;">
+                                        {film_rating}
+                                    </div>
+                                    <div class="confidence-meter">
+                                        <div class="confidence-fill" style="width: {min(confidence, 100)}%;"></div>
+                                    </div>
+                                    <p style="font-size: 1.2rem; margin: 1rem 0;">
+                                        AI Confidence: {min(confidence, 100):.1f}%
+                                    </p>
+                                    <div style="display: flex; justify-content: space-between; color: #ffffff;">
+                                        <span>😡 Hated It</span>
+                                        <span>🎭 Mixed Feelings</span>
+                                        <span>😍 Loved It</span>
+                                    </div>
+                                </div>
                             </div>
-                            <h2 style="color: {sentiment_color}; margin: 1rem 0;">
-                                {sentiment_label}
-                            </h2>
-                            <div class="confidence-meter">
-                                <div class="confidence-fill" style="width: {min(confidence, 100)}%;"></div>
-                            </div>
-                            <p style="font-size: 1.2rem; margin: 1rem 0;">
-                                AI Confidence: {min(confidence, 100):.1f}%
-                            </p>
-                            <div style="display: flex; justify-content: space-between; color: #ffffff;">
-                                <span>😡 Negative</span>
-                                <span>🎭 Neutral</span>
-                                <span>😍 Positive</span>
-                            </div>
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
+                        """, unsafe_allow_html=True)
+                        
+                        if unknown_words and unknown_ratio > 0.3:
+                            st.info("🎬 **Director's Note:** Some uncommon words were replaced, but we got the essence!")
 
-# Example Section
+                except Exception as e:
+                    st.warning("""
+                    🎥 **Oops! Detected Out of Vocabulary Context!**  
+                    Our model is trained with movie reviews only.  
+                    Please try:  
+                    1. Using more common film vocabulary  
+                    2. Writing in English about movies  
+                      
+                    Example: *"The director's vision was clear, with powerful performances that moved me deeply."*\n
+                    *Sorry for your incovinience...*
+                    """)
+
+
 st.markdown("""
     <div style="background: rgba(255,215,0,0.1); padding: 2rem; border-radius: 15px; margin-top: 2rem;">
         <h3 style="color: #ffd700; font-family: 'Cinzel';">🍿 Try These Classic Reviews</h3>
@@ -263,3 +311,4 @@ st.markdown("""
         </div>
     </div>
 """, unsafe_allow_html=True)
+
