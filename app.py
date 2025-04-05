@@ -288,7 +288,7 @@ with col2:
                     2. Writing in English about movies  
                       
                     Example: *"The director's vision was clear, with powerful performances that moved me deeply."*\n
-                    *Sorry for your incovinience...*
+                    *Sorry for your inconvinience...*
                     """)
 
 
